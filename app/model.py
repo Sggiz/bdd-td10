@@ -392,16 +392,29 @@ class Model:
     # validations and students having taken them, sorted by decreasing
     # date of validation.
     def listGradesOfCourse(self, idCourse):
+        # !!! Un note d'un étudiant peut apparaître plusieurs fois, si celui-ci
+        #     est inscrit à plusieurs curriculums contenant ce cours.
         self.cursor.execute(f"""
-        SELECT v.v_id, v.date, c.name, s.first_name || ' ' || s.last_name,
-            v.name, g.grade, v.coeff
+        SELECT
+            v.v_id,
+            v.date,
+            p.name,
+            s.first_name || ' ' || s.last_name,
+            v.name,
+            g.grade,
+            v.coeff
         FROM Grade AS g
         JOIN Student AS s
             ON s.s_id = g.s_id
         JOIN Validation AS v
             ON v.v_id = g.v_id
-        JOIN Course AS c
-            ON c.c_id = v.c_id
+        JOIN Attends AS a
+            ON a.s_id = s.s_id
+        JOIN Program AS p
+            ON p.p_id = a.p_id
+        JOIN Contains AS cont
+            ON cont.p_id = p.p_id AND cont.c_id = {idCourse}
+        WHERE v.c_id = {idCourse}
         ORDER BY date DESC;
         """)
         return self.cursor.fetchall()
@@ -418,7 +431,7 @@ class Model:
     # Add a grade to a student.
     def addGrade(self, idValidation, idStudent, grade):
         self.cursor.execute(f"""
-        INSET INTO Grade(v_id, s_id, grade) VALUES
+        INSERT INTO Grade(v_id, s_id, grade) VALUES
             ({idValidation}, {idStudent}, {grade});
         """)
 
@@ -433,7 +446,7 @@ class Model:
     # a given validation.
     def listGradesOfValidation(self, idValidation):
         self.cursor.execute(f"""
-        SELECT firs_name || ' ' || last_name, grade
+        SELECT first_name || ' ' || last_name, grade
         FROM Student
         NATURAL JOIN GRADE
         WHERE v_id = {idValidation};
@@ -513,6 +526,7 @@ class Model:
         WHERE g.grade IS NULL
         GROUP BY (v.v_id, c.name, c.t_id)
         HAVING c.t_id = {idTeacher}
+            AND v.date < NOW()
         ORDER BY v.date;
         """)
         return self.cursor.fetchall()

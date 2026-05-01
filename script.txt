@@ -85,3 +85,15 @@ CREATE TABLE Grade (
 
 \copy Teacher(first_name, last_name, tel) FROM './teacher.txt' DELIMITER ',' NULL ''
 
+\copy Program(t_id,name) FROM './program.txt' DELIMITER ',' NULL ''
+
+\copy Course(t_id,name) FROM './course.txt' DELIMITER ',' NULL ''
+
+\copy Contains(c_id,p_id,ects) FROM './contains.txt' DELIMITER ',' NULL ''
+
+\copy Validation(c_id,name,coeff,date) FROM './validation.txt' DELIMITER ',' NULL ''
+
+\copy Attends(s_id,p_id) FROM './attends.txt' DELIMITER ',' NULL ''
+
+\copy Grade(v_id, s_id, grade) FROM './grade.txt' DELIMITER ',' NULL ''
+

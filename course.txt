@@ -1,0 +1,23 @@
+8,Hard science-fiction
+7,La science-iction du système solaire
+6,Voyage dans le temps
+5,Uchronie
+4,Cyberpunk
+3,Space opera
+2,Space fantasy
+1,Science-fiction pastorale
+6,Planet opera
+2,Science-fiction post-apocalyptique
+7,Science-fitcion féministe
+3,Fondateurs: Mary Shelley -Jules Verne - Wells
+1,Fiction spéculative
+5,Techno-féodalisme
+2,Biopunk
+8,Rétrofuturisme
+1,Seapunk
+4,Steampunk
+3,Utopie ou monde perdu
+1,Science-fiction militaire
+8,Techno-orientalisme
+5,Anti-héros et méga-corporations
+1,De Akira à Cyberpunk: Edgrunners
