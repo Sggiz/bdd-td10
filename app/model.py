@@ -392,7 +392,7 @@ class Model:
     # validations and students having taken them, sorted by decreasing
     # date of validation.
     def listGradesOfCourse(self, idCourse):
-        # !!! Un note d'un étudiant peut apparaître plusieurs fois, si celui-ci
+        # !!! Une note d'un étudiant peut apparaître plusieurs fois, si celui-ci
         #     est inscrit à plusieurs curriculums contenant ce cours.
         self.cursor.execute(f"""
         SELECT
