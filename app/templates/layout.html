@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <title>Grades and Accounts Application</title>
+  </head>
+  <body>
+      <header>
+        <h1>Grades and Accounts Application</h1>
+        <nav>
+          <ul>
+            <li><a href="/student/">Students</a></li>
+            <li><a href="/account/">Accounts</a></li>
+            <li><a href="/teacher/">Teachers</a></li>
+            <li><a href="/curriculum/">Curriculums</a></li>
+            <li><a href="/course/">Courses</a></li>
+          </ul>
+        </nav>
+      </header>
+      <article>
+        {% block body %}
+
+      {% endblock %}
+        {% for form in forms %}
+          {% for _, errors in form.errors.items() %}
+            {% for error in errors %}
+            <div class="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+          {% endfor %}
+          <form method="post">
+          <b>{{ form.formname }}</b><br/>
+          {%  for field in form  %}
+            {{ field.label }} : {{ field }} <br/>
+          {% endfor%}
+          <input type="submit" value="add">
+          </form>
+        {% endfor %}
+      </article>
+  </body>
+</html>

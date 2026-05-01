@@ -1,0 +1,61 @@
+Nicola,Abbagnano,15071901
+Gonzalo,Arango,18011931
+Hannah,Arendt,14141906
+Abdel Rahman,Badawi,17021917
+Hazel,Barnes,16121915
+Karl,Barth,10051886
+Nikolai,Berdyaev,18051974
+Steve,Biko,18121946
+Martin,Buber,08021979
+Rudolf,Bultmann,20081884
+Dino,Buzzati,16101906
+Albert,Camus,27111913
+Jane Welsh,Carlyle,14071801
+Thomas,Carlyle,04121795
+Emil,Cioran,08041911
+Simone,de Beauvoir,09011908
+Walter A.,Davis,09111942
+Fyodor,Dostoyevsky,11111821
+William A.,Earle,00001919
+Ralph,Ellison,01051913
+Frantz,Fanon,20071925
+Vilém,Flusser,12051920
+Benjamin,Fondane,14111898
+James Anthony,Froude,23041818
+Alberto,Giacometti,10101901
+Juozas,Girnius,00001915
+Fernando,Gonzalez,24041895
+Lewis,Gordon,00001962
+Martin,Heidegger,26091889
+Edmund,Husserl,08041858
+Nae,Ionescu,16061890
+Eugène,Ionesco,26111909
+William,James,11011842
+Karl,Jaspers,23021883
+Franz,Kafka,03071883
+Walter,Kaufmann,01071921
+Soren,Kierkegaard,05051813
+Ladislav,Klima,08081878
+Emmanuel,Levinas,12011906
+John,Macquarrie,27061919
+Vytautas,Macernis,05061921
+Naguib,Mahfouz,11121911
+Gabriel,Marcel,07121889
+Maurice,Merleau-Ponty,14031908
+Friedrich,Nietzsche,15101844
+José Ortega,y Gasset,09051883
+Viktor,Petrov,00001894
+Franz,Rosenzweig,26121887
+Jean-Paul,Sartre,21061905
+Aous,Shakra,22041908
+Lev,Shestov,31011866
+Joseph B.,Soloveitchik,27021903
+Paul,Tillich,20081886
+Rick,Turner,00001942
+Miguel,de Unamuno,29091864
+John Daniel,Wild,10041902
+Colin,Wilson,26061931
+Richard,Wright,04091908
+Peter Wessel,Zapffe,18121899
+Muhammad,Iqbal,90111877
+Zachary A.,Behlok,03101996

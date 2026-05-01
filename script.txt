@@ -1,0 +1,87 @@
+
+DROP TABLE Grade;
+DROP TABLE Contains;
+DROP TABLE Attends;
+DROP TABLE Validation;
+DROP TABLE Course;
+DROP TABLE Program;
+DROP TABLE Teacher;
+DROP TABLE Transfer;
+DROP TABLE Deposit;
+DROP TABLE Student;
+
+CREATE TABLE Student (
+    s_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(32),
+    last_name VARCHAR(32),
+    tel VARCHAR(32),
+    balance DECIMAL CHECK ( Student.balance <= 1000000000) DEFAULT 0
+);
+
+CREATE TABLE Deposit (
+    dep_id SERIAL PRIMARY KEY,
+    recipient INT REFERENCES Student(s_id) ON DELETE CASCADE,
+    amount DECIMAL,
+    time TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE Transfer (
+    tr_id SERIAL PRIMARY KEY,
+    issuer INT REFERENCES Student(s_id) ON DELETE SET NULL,
+    recipient INT REFERENCES Student(s_id) ON DELETE SET NULL
+        CHECK (Transfer.recipient != Transfer.issuer),
+    amount DECIMAL CHECK (Transfer.amount >= 0),
+    time TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE Teacher (
+    t_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(32),
+    last_name VARCHAR(32),
+    tel VARCHAR(32)
+);
+
+CREATE TABLE Program (
+    p_id SERIAL PRIMARY KEY,
+    t_id INT REFERENCES Teacher(t_id) ON DELETE SET NULL,
+    name TEXT
+);
+
+CREATE TABLE Course (
+    c_id SERIAL PRIMARY KEY,
+    t_id INT REFERENCES Teacher(t_id) ON DELETE SET NULL,
+    name TEXT
+);
+
+CREATE TABLE Validation (
+    v_id SERIAL PRIMARY KEY,
+    c_id INT REFERENCES Course(c_id) ON DELETE CASCADE,
+    name TEXT,
+    coeff DECIMAL CHECK( Validation.coeff >= 0),
+    date DATE
+);
+
+CREATE TABLE Attends (
+    s_id INT REFERENCES Student(s_id) ON DELETE CASCADE,
+    p_id INT REFERENCES Program(p_id) ON DELETE CASCADE,
+    PRIMARY KEY(s_id, p_id)
+);
+
+CREATE TABLE Contains (
+    p_id INT REFERENCES Program(p_id) ON DELETE CASCADE,
+    c_id INT REFERENCES Course(c_id) ON DELETE CASCADE,
+    ects INT CHECK (Contains.ects >= 0),
+    PRIMARY KEY(p_id, c_id)
+);
+
+CREATE TABLE Grade (
+    v_id INT REFERENCES Validation(v_id) ON DELETE CASCADE,
+    s_id INT REFERENCES Student(s_id) ON DELETE CASCADE,
+    grade DECIMAL CHECK( Grade.grade >= 0 ),
+    PRIMARY KEY(v_id, s_id)
+);
+
+\copy Student(first_name, last_name, tel) FROM './student.txt' DELIMITER ',' NULL ''
+
+\copy Teacher(first_name, last_name, tel) FROM './teacher.txt' DELIMITER ',' NULL ''
+
