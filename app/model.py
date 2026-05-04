@@ -305,10 +305,66 @@ class Model:
     # beware that if a student does not have a grade for a validation
     # or is not registered to a course, he should have 0.
     def averageGradesOfStudentsInCurriculum(self, idCurriculum):
+#        self.cursor.execute(f"""
+#        SELECT SUM(coeff)
+#        FROM Validation
+#        WHERE c_id = {idCourse};
+#        """)
+#        total_coeff = self.cursor.fetchall()[0][0]
+#        self.cursor.execute(f"""
+#        WITH attending AS (
+#            SELECT DISTINCT(a.s_id)
+#            FROM Attends AS a
+#            JOIN Contains AS cont
+#                ON cont.c_id = { idCourse } AND cont.p_id = a.p_id
+#        )
+#        SELECT s.s_id,
+#            s.first_name || ' ' || s.last_name,
+#            SUM( v.coeff * g.grade ) / { total_coeff }
+#        FROM attending AS att
+#        JOIN Student AS s
+#            ON s.s_id = att.s_id
+#        JOIN Validation AS v
+#            ON v.c_id = { idCourse }
+#        JOIN Grade AS g
+#            ON g.v_id = v.v_id AND g.s_id = att.s_id
+#        GROUP BY s.s_id;
+#        """)
         self.cursor.execute(f"""
-        WITH 
-        SELECT first_name || ' ' || last_name, 0
-        FROM Student;
+        SELECT SUM(ects)
+        FROM Contains
+        WHERE p_id = { idCurriculum };
+        """)
+        total_ects = self.cursor.fetchall()[0][0]
+        if total_ects is None:
+            total_ects = 0
+        self.cursor.execute(f"""
+        WITH course_total_coeff AS (
+            SELECT v.c_id, SUM(coeff) AS tot, cont.ects
+            FROM Validation AS v
+            JOIN Contains AS cont
+                ON cont.c_id = v.c_id AND cont.p_id = { idCurriculum }
+            GROUP BY (v.c_id, cont.ects)
+        ),
+        course_grades AS (
+            SELECT a.s_id, SUM( v.coeff * g.grade ) / ctc.tot AS grade, ctc.ects
+            FROM course_total_coeff AS ctc
+            JOIN Attends AS a
+                ON a.p_id = { idCurriculum }
+            JOIN Validation AS v
+                ON v.c_id = ctc.c_id
+            JOIN Grade AS g
+                ON g.v_id = v.v_id AND g.s_id = a.s_id
+            GROUP BY (a.s_id, ctc.c_id, ctc.tot, ctc.ects)
+        ),
+        student_averages AS (
+            SELECT s_id, SUM(ects*grade) / { total_ects } AS average
+            FROM course_grades
+            GROUP BY s_id
+        )
+        SELECT first_name || ' ' || last_name, average
+        FROM student_averages
+        NATURAL JOIN Student
         """)
         return self.cursor.fetchall()
 
@@ -387,6 +443,8 @@ class Model:
         WHERE c_id = {idCourse};
         """)
         total_coeff = self.cursor.fetchall()[0][0]
+        if total_coeff is None:
+            total_coeff = 0
         self.cursor.execute(f"""
         WITH attending AS (
             SELECT DISTINCT(a.s_id)
@@ -402,7 +460,7 @@ class Model:
             ON s.s_id = att.s_id
         JOIN Validation AS v
             ON v.c_id = { idCourse }
-        JOIN Grade AS g
+        LEFT JOIN Grade AS g
             ON g.v_id = v.v_id AND g.s_id = att.s_id
         GROUP BY s.s_id;
         """)
