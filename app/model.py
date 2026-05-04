@@ -306,6 +306,7 @@ class Model:
     # or is not registered to a course, he should have 0.
     def averageGradesOfStudentsInCurriculum(self, idCurriculum):
         self.cursor.execute(f"""
+        WITH 
         SELECT first_name || ' ' || last_name, 0
         FROM Student;
         """)
@@ -323,7 +324,7 @@ class Model:
     # Register a course to a curriculum.
     def registerCourseToCurriculum(self, idCourse, idCurriculum, ects):
         self.cursor.execute(f"""
-        INSERT INTO Conatins(p_id, c_id, ects) VALUES
+        INSERT INTO Contains(p_id, c_id, ects) VALUES
             ({idCurriculum}, {idCourse}, {ects});
         """)
 
@@ -381,8 +382,29 @@ class Model:
     # or is not registered to a course, he should have 0.
     def listStudentsOfCourse(self, idCourse):
         self.cursor.execute(f"""
-        SELECT s_id, first_name || ' ' || last_name, 0
-        FROM Student;
+        SELECT SUM(coeff)
+        FROM Validation
+        WHERE c_id = {idCourse};
+        """)
+        total_coeff = self.cursor.fetchall()[0][0]
+        self.cursor.execute(f"""
+        WITH attending AS (
+            SELECT DISTINCT(a.s_id)
+            FROM Attends AS a
+            JOIN Contains AS cont
+                ON cont.c_id = { idCourse } AND cont.p_id = a.p_id
+        )
+        SELECT s.s_id,
+            s.first_name || ' ' || s.last_name,
+            SUM( v.coeff * g.grade ) / { total_coeff }
+        FROM attending AS att
+        JOIN Student AS s
+            ON s.s_id = att.s_id
+        JOIN Validation AS v
+            ON v.c_id = { idCourse }
+        JOIN Grade AS g
+            ON g.v_id = v.v_id AND g.s_id = att.s_id
+        GROUP BY s.s_id;
         """)
         return self.cursor.fetchall()
 
@@ -392,9 +414,13 @@ class Model:
     # validations and students having taken them, sorted by decreasing
     # date of validation.
     def listGradesOfCourse(self, idCourse):
-        # !!! Une note d'un étudiant peut apparaître plusieurs fois, si celui-ci
-        #     est inscrit à plusieurs curriculums contenant ce cours.
         self.cursor.execute(f"""
+        WITH attending AS (
+            SELECT DISTINCT(a.s_id), a.p_id
+            FROM Attends AS a
+            JOIN Contains AS cont
+                ON cont.c_id = { idCourse } AND cont.p_id = a.p_id
+        )
         SELECT
             v.v_id,
             v.date,
@@ -404,16 +430,14 @@ class Model:
             g.grade,
             v.coeff
         FROM Grade AS g
+        JOIN attending AS att
+            ON g.s_id = att.s_id
         JOIN Student AS s
             ON s.s_id = g.s_id
         JOIN Validation AS v
             ON v.v_id = g.v_id
-        JOIN Attends AS a
-            ON a.s_id = s.s_id
         JOIN Program AS p
-            ON p.p_id = a.p_id
-        JOIN Contains AS cont
-            ON cont.p_id = p.p_id AND cont.c_id = {idCourse}
+            ON p.p_id = att.p_id
         WHERE v.c_id = {idCourse}
         ORDER BY date DESC;
         """)
