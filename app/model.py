@@ -150,7 +150,7 @@ class Model:
         self.cursor.execute(f"""
         SELECT dep_id, time, 'Deposit', NULL, amount
         FROM Deposit
-        WHERE recipient = {id}
+        WHERE recipient = { id }
 
         UNION
 
@@ -159,6 +159,7 @@ class Model:
         FROM Transfer
         JOIN Student
             ON issuer = s_id
+        WHERE recipient = { id }
 
         UNION
 
@@ -167,6 +168,7 @@ class Model:
         FROM Transfer
         JOIN Student
             ON recipient = s_id
+        WHERE issuer = { id }
 
         ORDER BY time DESC;
         """)
@@ -265,7 +267,7 @@ class Model:
     # curriculum, and have grades that should also be deleted).
     def deleteCourse(self, idCourse):
         self.cursor.execute(f"""
-        DELET FROM Course
+        DELETE FROM Course
         WHERE c_id = {idCourse};
         """)
 
@@ -328,7 +330,7 @@ class Model:
                 ON a.p_id = { idCurriculum }
             JOIN Validation AS v
                 ON v.c_id = ctc.c_id
-            JOIN Grade AS g
+            LEFT JOIN Grade AS g
                 ON g.v_id = v.v_id AND g.s_id = a.s_id
             GROUP BY (a.s_id, ctc.c_id, ctc.tot, ctc.ects)
         ),
