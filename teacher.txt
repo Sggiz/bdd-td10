@@ -1,8 +1,0 @@
-Sol,Helios,696342000
-Juppiter,Zeus,7148000
-Saturne,Kronos,60268000
-Uranus,Ouranos,25559000
-Neptune,Poseidon,24764000
-Terra,Gaia,6378137
-Venus,Hesperos,6051800
-Mars,Ares,3396200
