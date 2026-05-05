@@ -305,31 +305,6 @@ class Model:
     # beware that if a student does not have a grade for a validation
     # or is not registered to a course, he should have 0.
     def averageGradesOfStudentsInCurriculum(self, idCurriculum):
-#        self.cursor.execute(f"""
-#        SELECT SUM(coeff)
-#        FROM Validation
-#        WHERE c_id = {idCourse};
-#        """)
-#        total_coeff = self.cursor.fetchall()[0][0]
-#        self.cursor.execute(f"""
-#        WITH attending AS (
-#            SELECT DISTINCT(a.s_id)
-#            FROM Attends AS a
-#            JOIN Contains AS cont
-#                ON cont.c_id = { idCourse } AND cont.p_id = a.p_id
-#        )
-#        SELECT s.s_id,
-#            s.first_name || ' ' || s.last_name,
-#            SUM( v.coeff * g.grade ) / { total_coeff }
-#        FROM attending AS att
-#        JOIN Student AS s
-#            ON s.s_id = att.s_id
-#        JOIN Validation AS v
-#            ON v.c_id = { idCourse }
-#        JOIN Grade AS g
-#            ON g.v_id = v.v_id AND g.s_id = att.s_id
-#        GROUP BY s.s_id;
-#        """)
         self.cursor.execute(f"""
         SELECT SUM(ects)
         FROM Contains
@@ -636,16 +611,19 @@ class Model:
     def listValidationsOfStudent(self, idStudent):
         self.cursor.execute(f"""
         SELECT v.v_id, v.date, p.name, c.name, v.name, g.grade
-        FROM Grade AS g
-        JOIN Validation AS v
-            ON v.v_id = g.v_id
-        JOIN Course AS c
-            ON c.c_id = v.c_id
-        JOIN Attends AS a
-            ON a.s_id = v.s_id
+        FROM Attends AS a
         JOIN Contains AS cont
-            ON cont.c_id = c.c_id AND cont.p_id = a.p_id
-        WHERE v.s_id = {idStudent};
+            ON cont.p_id = a.p_id
+        JOIN Validation AS v
+            ON v.c_id = cont.c_id
+        LEFT JOIN Grade AS g
+            ON g.v_id = v.v_id AND g.s_id = { idStudent }
+        JOIN Course AS c
+            ON c.c_id = cont.c_id
+        JOIN Program AS p
+            ON p.p_id = a.p_id
+        WHERE a.s_id = { idStudent }
+        ORDER BY v.date DESC;
         """)
         return self.cursor.fetchall()
 
@@ -655,6 +633,45 @@ class Model:
     # average grade is computed as before.
     def listCurriculumsOfStudent(self, idStudent):
         self.cursor.execute(f"""
-        TODO 39
+        WITH attended_courses AS (
+            SELECT DISTINCT(cont.c_id), cont.ects
+            FROM Contains AS cont
+            JOIN Attends AS a
+                ON a.p_id = cont.p_id AND a.s_id = { idStudent }
+        ),
+        program_total_ects AS (
+            SELECT cont.p_id, SUM(cont.ects) AS tot_ects
+            FROM Contains AS cont
+            JOIN Attends AS a
+                ON a.p_id = cont.p_id AND a.s_id = { idStudent }
+            GROUP BY cont.p_id
+        ),
+        course_total_coeff AS (
+            SELECT c_id, SUM(coeff) AS tot_coeff
+            FROM attended_courses
+            NATURAL LEFT JOIN Validation AS v
+            GROUP BY c_id
+        ),
+        course_grades AS (
+            SELECT ctc.c_id, SUM( v.coeff * g.grade / ctc.tot_coeff ) AS grade
+            FROM course_total_coeff AS ctc
+            LEFT JOIN Validation AS v
+                ON v.c_id = ctc.c_id
+            JOIN Grade AS g
+                ON g.v_id = v.v_id AND g.s_id = { idStudent }
+            GROUP BY ctc.c_id
+        ),
+        program_averages AS (
+            SELECT pte.p_id, SUM( cont.ects * cg.grade / pte.tot_ects ) AS average
+            FROM program_total_ects AS pte
+            JOIN Contains AS cont
+                ON cont.p_id = pte.p_id
+            JOIN course_grades AS cg
+                ON cg.c_id = cont.c_id
+            GROUP BY pte.p_id
+        )
+        SELECT name, average
+        FROM program_averages
+        NATURAL JOIN Program
         """)
         return self.cursor.fetchall()
